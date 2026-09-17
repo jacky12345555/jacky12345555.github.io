@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>如何讓人改變想法 讀書會</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+:root{
+  --ground:#E9EDF2; --paper:#FFFFFF; --soft:#F2F5F9; --line:#DCE2EA;
+  --ink:#16202E; --muted:#5B6878;
+  --a:#2F4FD8; --a-soft:#E6EBFF;      /* 視角 A：鈷藍 */
+  --b:#E8A21B; --b-soft:#FFF3D6;      /* 視角 B：琥珀 */
+  --ok:#1F9D6B; --ok-soft:#E1F5EC; --no:#D2493F; --no-soft:#FCE8E6;
+  --on-a:#FFFFFF;
+  --serif:"Noto Serif TC","Songti TC","PMingLiU",serif;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0C1118; --paper:#151C26; --soft:#1C2531; --line:#2A3444;
+    --ink:#E9EEF5; --muted:#9AA7B8;
+    --a:#7F96FF; --a-soft:#1F2A52; --b:#F5B843; --b-soft:#3A2E14;
+    --ok:#4CC896; --ok-soft:#15352A; --no:#F0766C; --no-soft:#3D1D1B; --on-a:#0C1118;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0C1118; --paper:#151C26; --soft:#1C2531; --line:#2A3444;
+  --ink:#E9EEF5; --muted:#9AA7B8;
+  --a:#7F96FF; --a-soft:#1F2A52; --b:#F5B843; --b-soft:#3A2E14;
+  --ok:#4CC896; --ok-soft:#15352A; --no:#F0766C; --no-soft:#3D1D1B; --on-a:#0C1118;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--ground);color:var(--ink);font-family:var(--sans);overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--a);outline-offset:2px}
+
+/* ===== 舞台 ===== */
+.viewport{position:fixed;inset:0 0 56px 0}
+.stage{position:absolute;left:50%;top:50%;width:1280px;height:720px;transform-origin:center;transform:translate(-50%,-50%)}
+.slide{position:absolute;inset:0;background:var(--paper);border-radius:6px;box-shadow:0 20px 60px rgba(16,24,40,.12);
+  padding:64px 80px 56px;opacity:0;visibility:hidden;transition:opacity .45s ease,transform .45s ease;transform:translateY(12px);overflow:hidden;display:flex;flex-direction:column}
+.slide.active{opacity:1;visibility:visible;transform:none}
+.eyebrow{font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:flex;gap:14px;align-items:center}
+.eyebrow b{color:var(--a);font-weight:500}
+.pgno{position:absolute;right:80px;top:64px;font-family:var(--mono);font-size:14px;color:var(--muted)}
+h1,h2,h3{font-family:var(--serif);margin:0;text-wrap:balance;letter-spacing:.01em}
+h2{font-size:46px;line-height:1.25;font-weight:900;margin-top:14px}
+h3{font-size:24px;font-weight:600;line-height:1.35}
+p{margin:0;line-height:1.75}
+.lead{font-size:21px;color:var(--muted);line-height:1.7;max-width:34em}
+.hl-a{background:linear-gradient(transparent 62%,var(--a-soft) 62%)}
+.hl-b{background:linear-gradient(transparent 62%,var(--b-soft) 62%)}
+.body{flex:1;display:grid;gap:40px;margin-top:30px;min-height:0}
+.cols-5-7{grid-template-columns:5fr 7fr}
+.cols-2{grid-template-columns:1fr 1fr}
+.stack{display:flex;flex-direction:column;gap:16px;min-height:0}
+.quote{font-family:var(--serif);font-size:24px;line-height:1.7;font-weight:600;border-left:4px solid var(--a);padding:4px 0 4px 24px}
+.quote small{display:block;font-family:var(--sans);font-size:15px;font-weight:400;color:var(--muted);margin-top:10px}
+.panel{background:var(--soft);border-radius:14px;padding:24px 28px}
+.tag{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.06em;padding:4px 10px;border-radius:999px;background:var(--a-soft);color:var(--a)}
+.tag.b{background:var(--b-soft);color:var(--ink)}
+.tag.ok{background:var(--ok-soft);color:var(--ok)} .tag.no{background:var(--no-soft);color:var(--no)}
+.btn{border:1.5px solid var(--line);background:var(--paper);border-radius:999px;padding:9px 18px;font-size:16px;font-weight:500;transition:.2s}
+.btn:hover{border-color:var(--a);color:var(--a)}
+.btn.on{background:var(--a);border-color:var(--a);color:var(--on-a)}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.primary:hover{opacity:.88;color:var(--paper)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.hint{font-size:14px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.hint::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--b);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.step{opacity:0;transform:translateY(10px);transition:.4s}
+.step.on{opacity:1;transform:none}
+.fade-in{animation:fin .35s ease}
+@keyframes fin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ===== 封面 / 章節頁 ===== */
+.cover{padding:0;flex-direction:row}
+.cover .left{flex:1.25;padding:72px 80px;display:flex;flex-direction:column;justify-content:space-between}
+.cover h1{font-size:84px;line-height:1.15;font-weight:900}
+.cover .right{flex:1;background:var(--a);position:relative;overflow:hidden}
+.lens{position:absolute;width:340px;height:340px;border-radius:50%}
+.lens.l1{background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.85);left:40px;top:130px;z-index:2}
+.lens.l2{background:#F2B233;opacity:.92;left:200px;top:230px}
+.cover .right .cap{position:absolute;left:40px;bottom:40px;right:40px;color:#fff;font-size:16px;line-height:1.6;opacity:.92}
+.divider{background:var(--ink);color:var(--paper);justify-content:center}
+.divider .num{font-family:var(--mono);font-size:18px;color:var(--b);letter-spacing:.18em}
+.divider h2{font-size:72px;margin-top:18px}
+.divider p{font-size:22px;opacity:.75;margin-top:22px;max-width:30em}
+.divider .ring{position:absolute;right:-120px;top:-120px;width:520px;height:520px;border-radius:50%;border:70px solid var(--a);opacity:.9}
+.divider .ring2{position:absolute;right:150px;bottom:-160px;width:300px;height:300px;border-radius:50%;background:var(--b);opacity:.9}
+
+/* ===== 元件 ===== */
+.agenda{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:auto}
+.agenda div{border-top:3px solid var(--line);padding-top:14px}
+.agenda div:nth-child(odd){border-color:var(--a)} .agenda div:nth-child(even){border-color:var(--b)}
+.agenda span{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.agenda h3{font-size:20px;margin-top:6px}
+
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chip{border:1.5px solid var(--line);background:var(--paper);border-radius:14px;padding:18px;text-align:left;transition:.2s}
+.chip b{display:block;font-size:20px;font-family:var(--serif)}
+.chip span{font-size:14px;color:var(--muted)}
+.chip.on{border-color:var(--a);background:var(--a-soft)}
+.example{background:var(--soft);border-radius:14px;padding:26px 30px;min-height:190px}
+.example .tag{margin-bottom:12px}
+.example p{font-size:19px}
+
+.fact{background:var(--ink);color:var(--paper);border-radius:14px;padding:22px 28px;font-size:22px;font-weight:500;display:flex;gap:16px;align-items:center}
+.fact .tag{background:var(--b);color:#16202E}
+.flips{display:grid;grid-template-columns:1fr 1fr;gap:20px;flex:1}
+.flip{perspective:1200px;border:0;background:none;padding:0;text-align:left;min-height:250px}
+.flip .inner{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d}
+.flip.flipped .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:16px;padding:26px 28px;backface-visibility:hidden;display:flex;flex-direction:column;gap:12px}
+.face.front{border:2px dashed var(--line);justify-content:center;align-items:center;text-align:center}
+.face.front .who{font-family:var(--serif);font-size:30px;font-weight:900}
+.face.back{transform:rotateY(180deg)}
+.flip.a .face.back{background:var(--a-soft)} .flip.b .face.back{background:var(--b-soft)}
+.face.back .say{font-family:var(--serif);font-size:24px;font-weight:600;line-height:1.5}
+.face.back .prior{font-size:16px;color:var(--muted);margin-top:auto;border-top:1px solid var(--line);padding-top:12px}
+
+.formula{display:flex;align-items:stretch;gap:14px}
+.term{flex:1;border:1.5px solid var(--line);border-radius:16px;padding:22px;text-align:left;background:var(--paper);transition:.25s}
+.term .letters{font-family:var(--mono);font-size:40px;color:var(--a);letter-spacing:.05em}
+.term:nth-of-type(2) .letters{color:var(--b)}
+.term .en{font-size:15px;color:var(--muted);margin-top:4px}
+.term .zh{font-family:var(--serif);font-size:22px;font-weight:600;margin-top:8px}
+.term.on{border-color:var(--ink);box-shadow:0 10px 30px rgba(16,24,40,.1);transform:translateY(-4px)}
+.op{align-self:center;font-size:34px;color:var(--muted);font-family:var(--mono)}
+
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:stretch}
+.flow .node{background:var(--soft);border-radius:14px;padding:18px;position:relative;font-size:18px;line-height:1.55}
+.flow .node small{display:block;font-family:var(--mono);color:var(--a);font-size:13px;margin-bottom:6px}
+.flow .node:last-child{background:var(--ink);color:var(--paper)}
+.flow .node:last-child small{color:var(--b)}
+.flow .node:not(:last-child)::after{content:"→";position:absolute;right:-12px;top:50%;transform:translate(50%,-50%);color:var(--muted);font-size:18px;z-index:1}
+
+.illusion{position:relative;height:300px;border-radius:16px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr}
+.illusion .bgL{background:linear-gradient(135deg,#1b2230,#3a4252)} .illusion .bgR{background:linear-gradient(135deg,#f3f4f6,#c9ced6)}
+.illusion .sq{position:absolute;top:95px;width:110px;height:110px;background:#7d828a;transition:.5s}
+.illusion .sq.l{left:calc(25% - 55px)} .illusion .sq.r{left:calc(75% - 55px)}
+.illusion .bridge{position:absolute;left:calc(25% - 55px);right:calc(25% - 55px);top:130px;height:40px;background:#7d828a;transform:scaleX(0);transform-origin:left;transition:transform .7s}
+.illusion.reveal .bridge{transform:scaleX(1)}
+.illusion.nobg .bgL,.illusion.nobg .bgR{background:#b9bec6;transition:.6s}
+
+.meter{height:22px;background:var(--soft);border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.meter i{display:block;height:100%;width:60%;background:linear-gradient(90deg,var(--a),var(--b));transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.evidence{display:flex;flex-direction:column;gap:10px;min-height:230px}
+.ev{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:17px}
+.ev div{border-radius:12px;padding:12px 16px}
+.ev .in{background:var(--a-soft)} .ev .out{background:var(--b-soft)}
+.bignum{font-family:var(--mono);font-size:56px;line-height:1}
+
+.personas{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.persona{border:1.5px solid var(--line);border-radius:14px;padding:16px;text-align:left;background:var(--paper)}
+.persona b{display:block;font-size:18px} .persona span{font-size:14px;color:var(--muted)}
+.persona.on{border-color:var(--b);background:var(--b-soft)}
+.speech{position:relative;background:var(--soft);border-radius:18px;padding:26px 30px;font-family:var(--serif);font-size:28px;font-weight:600;line-height:1.5}
+.lensrow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.lensrow div{font-size:15px;border-top:2px solid var(--line);padding-top:8px;color:var(--muted)}
+.lensrow div b{display:block;color:var(--ink);font-size:16px;margin-bottom:2px}
+
+.pairs{display:flex;flex-direction:column;gap:14px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pair div{border-radius:14px;padding:18px 22px;font-size:20px;line-height:1.55;transition:.35s}
+.pair .what{background:var(--no-soft)} .pair .how{background:var(--ok-soft)}
+.pair small{display:block;font-size:13px;font-weight:700;letter-spacing:.08em;margin-bottom:4px}
+.pair .what small{color:var(--no)} .pair .how small{color:var(--ok)}
+.pairs.dim-what .what{opacity:.25;filter:grayscale(1)}
+.pairs.dim-how .how{opacity:.25;filter:grayscale(1)}
+
+.quiz{display:flex;flex-direction:column;gap:12px;min-height:0}
+.q{background:var(--soft);border-radius:14px;padding:14px 18px}
+.q .sit{font-weight:700;font-size:17px;margin-bottom:8px}
+.q .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{position:relative;border:1.5px solid var(--line);background:var(--paper);border-radius:12px;padding:10px 14px 10px 14px;text-align:left;font-size:16px;line-height:1.5;transition:.2s;}
+.opt .res{display:block;margin-top:6px;height:22px;opacity:0;transform:translateY(4px);transition:.25s;pointer-events:none}
+.opt.shown .res{opacity:1;transform:none}
+.opt .res .tag{font-size:12px;padding:3px 9px}
+.opt.shown.acc .res .tag{background:var(--ok);color:var(--paper)}
+.opt.shown.asm .res .tag{background:var(--b);color:#16202E}
+.opt.shown.asm{border-color:var(--b)} .opt.shown.acc{border-color:var(--ok)}
+
+.scale{position:relative;height:220px}
+.beam{position:absolute;left:50%;top:70px;width:440px;height:10px;margin-left:-220px;background:var(--ink);border-radius:6px;transition:transform .6s cubic-bezier(.3,1.4,.5,1)}
+.pan{position:absolute;top:10px;width:150px;text-align:center}
+.pan .dish{height:56px;border-radius:0 0 90px 90px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px}
+.pan.l{left:-30px}.pan.r{right:-30px}
+.pan.l .dish{background:var(--no-soft);color:var(--no)} .pan.r .dish{background:var(--ok-soft);color:var(--ok)}
+.pan .dish{transform:translateY(0)}
+.pivot{position:absolute;left:50%;top:78px;margin-left:-28px;width:0;height:0;border-left:28px solid transparent;border-right:28px solid transparent;border-bottom:120px solid var(--line)}
+.slider{display:grid;grid-template-columns:80px 1fr 40px;gap:14px;align-items:center;font-size:17px}
+input[type=range]{width:100%;accent-color:var(--a)}
+.verdict{border-radius:14px;padding:18px 22px;font-size:19px;line-height:1.6;background:var(--soft)}
+.preset{font-size:15px;padding:7px 14px}
+
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.choice{border:2px solid var(--line);border-radius:16px;padding:22px;background:var(--paper);font-family:var(--serif);font-size:26px;font-weight:600}
+.choice.pick{border-color:var(--a);background:var(--a-soft)}
+
+.se{display:grid;grid-template-columns:330px 1fr;gap:28px;flex:1;min-height:0}
+.steps{display:flex;flex-direction:column;gap:4px;overflow:auto}
+.sbtn{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:center;text-align:left;border:0;background:none;border-radius:10px;padding:7px 10px;font-size:16px;color:var(--muted)}
+.sbtn i{font-style:normal;font-family:var(--mono);width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:14px}
+.sbtn.done{color:var(--ink)} .sbtn.done i{background:var(--a-soft);border-color:var(--a-soft);color:var(--a)}
+.sbtn.on{background:var(--soft);color:var(--ink);font-weight:700} .sbtn.on i{background:var(--a);border-color:var(--a);color:var(--on-a)}
+.dialog{background:var(--soft);border-radius:16px;padding:26px 30px;display:flex;flex-direction:column;gap:14px;min-height:0}
+.dialog .title{font-family:var(--serif);font-size:30px;font-weight:900}
+.bubble{max-width:88%;padding:12px 18px;border-radius:16px;font-size:18px;line-height:1.6}
+.bubble.me{background:var(--a);color:var(--on-a);align-self:flex-end;border-bottom-right-radius:4px}
+.bubble.them{background:var(--paper);border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+.bubble .who{display:block;font-size:12px;opacity:.75;margin-bottom:2px;letter-spacing:.05em}
+.why{margin-top:auto;font-size:16px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+.why b{color:var(--ink)}
+.conf{display:flex;gap:14px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:10px 16px}
+.conf output{font-family:var(--mono);font-size:26px;min-width:52px;text-align:right;color:var(--a)}
+
+.takeaways{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;flex:1}
+.tk{border-radius:16px;padding:22px 18px;background:var(--soft);display:flex;flex-direction:column;gap:10px}
+.tk:nth-child(1){background:var(--a);color:var(--on-a)}
+.tk .k{font-family:var(--mono);font-size:13px;opacity:.7}
+.tk h3{font-size:22px}
+.tk p{font-size:16px;line-height:1.65;opacity:.9}
+
+.qcard{background:var(--ink);color:var(--paper);border-radius:20px;padding:40px 44px;font-family:var(--serif);font-size:36px;font-weight:600;line-height:1.5;min-height:250px;display:flex;align-items:center}
+.timer{font-family:var(--mono);font-size:64px;line-height:1;font-variant-numeric:tabular-nums}
+.tbar{height:6px;background:var(--line);border-radius:6px;overflow:hidden}
+.tbar i{display:block;height:100%;width:100%;background:var(--b);transition:width 1s linear}
+
+/* ===== 控制列 ===== */
+.progress{position:fixed;left:0;top:0;height:3px;background:var(--a);transition:width .4s;z-index:5}
+.bar{position:fixed;left:0;right:0;bottom:0;height:56px;padding:0 16px env(safe-area-inset-bottom,0px);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);font-size:14px}
+.bar .grp{display:flex;gap:6px;align-items:center}
+.ib{border:1px solid var(--line);background:var(--paper);border-radius:10px;height:36px;min-width:36px;padding:0 12px;display:grid;place-items:center;font-size:14px}
+.ib:hover{color:var(--a);border-color:var(--a)}
+.counter{font-family:var(--mono);min-width:70px;text-align:center;color:var(--ink)}
+.stitle{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40vw}
+.toc{position:fixed;right:16px;bottom:64px;width:320px;max-width:calc(100vw - 32px);max-height:70vh;overflow:auto;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 50px rgba(16,24,40,.18);padding:10px;z-index:10}
+.toc button{display:grid;grid-template-columns:34px 1fr;width:100%;text-align:left;border:0;background:none;padding:9px 10px;border-radius:8px;font-size:15px}
+.toc button span{font-family:var(--mono);color:var(--muted);font-size:13px}
+.toc button:hover,.toc button.cur{background:var(--soft)}
+.keys{font-family:var(--mono);font-size:12px}
+@media (max-width:640px){.stitle,.keys{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="viewport"><div class="stage" id="stage">
+
+<!-- 1 封面 -->
+<section class="slide cover" data-title="封面">
+  <div class="left">
+    <div class="eyebrow"><b>讀書會</b> · How Minds Change</div>
+    <div>
+      <h1>如何讓人<br>改變想法</h1>
+      <p class="lead" style="margin-top:26px">為什麼「拿出證據」常常說服不了人？<br>從大腦怎麼消除不確定性，談職場與人際中的溝通。</p>
+    </div>
+    <div class="hint">按 → 或空白鍵前進，頁面中的元素多半可以點</div>
+  </div>
+  <div class="right">
+    <div class="lens l1"></div><div class="lens l2"></div>
+    <div class="cap">同一個事實，兩個鏡片。<br>重疊的地方是共識；不重疊的，是我們吵架的原因。</div>
+  </div>
+</section>
+
+<!-- 2 暖身 -->
+<section class="slide" data-title="暖身與今日流程">
+  <div class="eyebrow"><b>暖身</b> 開始之前</div><div class="pgno"></div>
+  <h2>你最近一次<span class="hl-b">真的</span>改變想法，<br>是因為什麼？</h2>
+  <div class="row" style="margin-top:26px" id="warm">
+    <button class="btn" data-v="有人給我看了數據">有人給我看了數據</button>
+    <button class="btn" data-v="我信任的人這樣說">我信任的人這樣說</button>
+    <button class="btn" data-v="我親身經歷了一次">我親身經歷了一次</button>
+    <button class="btn" data-v="被吵贏的">被吵贏的</button>
+  </div>
+  <p class="lead fade-in" id="warmOut" style="margin-top:18px;min-height:64px">先選一個，記住你的答案 —— 讀完今天這本書，再回頭看看。</p>
+  <div class="agenda">
+    <div><span>PART 1</span><h3>不確定性與框架競爭</h3></div>
+    <div><span>PART 2</span><h3>SURFPAD</h3></div>
+    <div><span>PART 3</span><h3>證據為什麼沒用</h3></div>
+    <div><span>PART 4</span><h3>同化與調適</h3></div>
+    <div><span>PART 5</span><h3>街頭知識論</h3></div>
+  </div>
+</section>
+
+<!-- 3 章節 -->
+<section class="slide divider" data-title="PART 1 不確定性與框架競爭">
+  <div class="ring"></div><div class="ring2"></div>
+  <div class="num">PART 01</div>
+  <h2>不確定性<br>與框架競爭</h2>
+  <p>我們通常不會發現自己「還不確定」。</p>
+</section>
+
+<!-- 4 挑選先驗知識 -->
+<section class="slide" data-title="我們在挑選先驗知識">
+  <div class="eyebrow"><b>PART 1</b> 不確定性</div><div class="pgno"></div>
+  <h2>我們不是用<span class="hl-a">所有</span>的經驗判斷，<br>而是挑「當下想用的」那些</h2>
+  <div class="body cols-5-7">
+    <div class="stack">
+      <p class="lead" style="font-size:19px">面對不確定時，大腦不會把所有先驗知識都搬出來，而是根據下面這些需求，<b>悄悄挑選</b>要用哪些 —— 而且我們自己不會察覺。</p>
+      <div class="chips" id="chips">
+        <button class="chip on" data-k="0"><b>身分認同</b><span>我是怎樣的人</span></button>
+        <button class="chip" data-k="1"><b>歸屬感</b><span>我屬於哪一群</span></button>
+        <button class="chip" data-k="2"><b>社會成本</b><span>說出來會付出什麼</span></button>
+        <button class="chip" data-k="3"><b>信任與名聲</b><span>是誰說的</span></button>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="example fade-in" id="chipEx"></div>
+      <div class="panel" style="font-size:17px;line-height:1.7"><span class="tag b">關鍵</span>&nbsp; 雙方對<b>事實本身有共識</b>，卻對<b>事實的詮釋</b>有異見 —— 心理學稱為「框架競爭」。</div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 框架競爭 -->
+<section class="slide" data-title="框架競爭：同一件事，兩種詮釋">
+  <div class="eyebrow"><b>PART 1</b> 框架競爭</div><div class="pgno"></div>
+  <h2>同一件事，兩種詮釋</h2>
+  <div class="row" style="margin-top:18px" id="frameTabs">
+    <button class="btn on" data-s="0">職場</button>
+    <button class="btn" data-s="1">伴侶</button>
+    <button class="btn" data-s="2">家人</button>
+    <span class="hint" style="margin-left:10px">點卡片翻面，看對方眼中的世界</span>
+  </div>
+  <div class="stack" style="margin-top:18px;flex:1">
+    <div class="fact"><span class="tag">雙方都同意的事實</span><span id="factTxt"></span></div>
+    <div class="flips">
+      <button class="flip a" id="flipA"><div class="inner">
+        <div class="face front"><span class="tag">視角 A</span><div class="who" id="whoA"></div></div>
+        <div class="face back"><span class="tag">視角 A 的詮釋</span><div class="say" id="sayA"></div><div class="prior" id="priorA"></div></div>
+      </div></button>
+      <button class="flip b" id="flipB"><div class="inner">
+        <div class="face front"><span class="tag b">視角 B</span><div class="who" id="whoB"></div></div>
+        <div class="face back"><span class="tag b">視角 B 的詮釋</span><div class="say" id="sayB"></div><div class="prior" id="priorB"></div></div>
+      </div></button>
+    </div>
+  </div>
+</section>
+
+<!-- 6 章節 -->
+<section class="slide divider" data-title="PART 2 SURFPAD">
+  <div class="ring"></div><div class="ring2"></div>
+  <div class="num">PART 02</div>
+  <h2>SURFPAD</h2>
+  <p>為什麼我們總在吵「兩邊都覺得再明顯不過」的事？</p>
+</section>
+
+<!-- 7 SURFPAD 公式 -->
+<section class="slide" data-title="SURFPAD 是什麼">
+  <div class="eyebrow"><b>PART 2</b> 心理學家沃利許的思考框架</div><div class="pgno"></div>
+  <h2>一條公式，解釋「怎麼會有人這樣想」</h2>
+  <div class="formula" style="margin-top:34px" id="formula">
+    <button class="term on" data-t="0"><div class="letters">SU</div><div class="en">Substantial Uncertainty</div><div class="zh">大量的不確定性</div></button>
+    <div class="op">＋</div>
+    <button class="term" data-t="1"><div class="letters">RFP</div><div class="en">Ramified or Filled-in Priors</div><div class="zh">各自不同、自行補完的先驗</div></button>
+    <div class="op">＝</div>
+    <button class="term" data-t="2"><div class="letters">AD</div><div class="en">Arguments &amp; Disagreement</div><div class="zh">爭論與意見分歧</div></button>
+  </div>
+  <div class="body cols-2" style="margin-top:26px">
+    <div class="example fade-in" id="termEx"></div>
+    <div class="panel">
+      <span class="tag">生活版代入</span>
+      <p style="font-size:18px;margin-top:12px" id="termLife"></p>
+    </div>
+  </div>
+</section>
+
+<!-- 8 同溫層 -->
+<section class="slide" data-title="為什麼群體會針鋒相對">
+  <div class="eyebrow"><b>PART 2</b> 從個人分歧到群體對立</div><div class="pgno"></div>
+  <h2>「肯定是我們對，他們有問題」<br>是這樣形成的</h2>
+  <p class="hint" style="margin-top:12px">按 → 逐步展開</p>
+  <div class="flow" style="margin-top:22px">
+    <div class="node step"><small>01</small>類似的<b>經歷</b>與<b>動機</b></div>
+    <div class="node step"><small>02</small>消除歧義時，做出<b>雷同的判斷</b></div>
+    <div class="node step"><small>03</small>在網路或現實中，<b>找到彼此</b></div>
+    <div class="node step"><small>04</small>「有值得信任的人跟我看法一樣」</div>
+    <div class="node step"><small>05</small>我們是對的；對方在事實或道德上<b>大有問題</b></div>
+  </div>
+  <div class="body cols-2 step" style="margin-top:26px">
+    <div class="panel">
+      <span class="tag">職場例子：產品延後上市</span>
+      <p style="font-size:18px;margin-top:12px"><b>業務部群組：</b>「研發又在龜毛，客戶都等不及了。」<br><b>研發部群組：</b>「業務亂答應客戶時程，品質誰負責？」</p>
+    </div>
+    <div class="panel">
+      <span class="tag b">沒被意識到的關鍵</span>
+      <p style="font-size:18px;margin-top:12px">兩邊看到的是<b>同一個延遲</b>。真正的分歧在「怎麼解讀」，但雙方都以為對方在否認<b>現實</b>，於是越吵越像兩個陣營。</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9 錯覺 -->
+<section class="slide" data-title="大腦必須做出假設">
+  <div class="eyebrow"><b>PART 2</b> 小實驗</div><div class="pgno"></div>
+  <h2>大腦必須做出種種假設，<br>才能優游於不確定的世界</h2>
+  <div class="body cols-5-7">
+    <div class="stack">
+      <p class="lead" style="font-size:20px">右邊兩個方塊，<b>哪一個比較亮？</b></p>
+      <p style="font-size:17px;color:var(--muted)">書中「那雙白襪子」的道理一樣：看的人對<b>照明</b>做了不同假設，就看到不同的顏色 —— 而且每個人都覺得自己看得很清楚。</p>
+      <div class="row">
+        <button class="btn primary" id="illuBtn">連起來看看</button>
+        <button class="btn" id="illuBg">移除背景</button>
+        <button class="btn" id="illuReset">重來</button>
+      </div>
+      <p class="fade-in" id="illuOut" style="font-size:18px;min-height:60px"></p>
+    </div>
+    <div class="illusion" id="illusion">
+      <div class="bgL"></div><div class="bgR"></div>
+      <div class="bridge"></div>
+      <div class="sq l"></div><div class="sq r"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 章節 -->
+<section class="slide divider" data-title="PART 3 證據為什麼沒用">
+  <div class="ring"></div><div class="ring2"></div>
+  <div class="num">PART 03</div>
+  <h2>證據為什麼沒用</h2>
+  <p>光是提出挑戰對方想法的證據，並無法改變信念，甚至會讓信念更堅定。</p>
+</section>
+
+<!-- 11 反效果模擬 -->
+<section class="slide" data-title="反證模擬器">
+  <div class="eyebrow"><b>PART 3</b> 互動模擬</div><div class="pgno"></div>
+  <h2>丟出反證，信念反而<span class="hl-b">升高</span>？</h2>
+  <div class="body cols-5-7">
+    <div class="stack">
+      <div class="panel" style="font-size:18px;line-height:1.7">
+        <span class="tag">情境</span><br>
+        主管一直認為<b>「A 供應商最可靠」</b>。你準備了三份資料，打算在會議上說服他換廠商。
+      </div>
+      <div>
+        <div class="row" style="justify-content:space-between;margin-bottom:8px"><span style="font-size:15px;color:var(--muted)">主管對「A 最可靠」的信心</span><span class="bignum" id="belief" style="font-size:34px">60</span></div>
+        <div class="meter"><i id="beliefBar"></i></div>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="evBtn">提出下一份證據</button>
+        <button class="btn" id="evReset">重來</button>
+      </div>
+      <p style="font-size:15px;color:var(--muted)">書中例子：你信賴的媒體總是批評某位政治人物；當另一個來源正面報導他，大腦不會更新，而是認定「一定是那家媒體有問題」。</p>
+    </div>
+    <div class="evidence" id="evList">
+      <div class="ev" style="font-size:14px;color:var(--muted)"><div style="padding:0 16px">你提出的證據</div><div style="padding:0 16px">主管大腦的「照明假設」</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 12 不同經歷 -->
+<section class="slide" data-title="如果走過別人的經歷">
+  <div class="eyebrow"><b>PART 3</b> 換位</div><div class="pgno"></div>
+  <h2>如果我們也走過別人的經歷，<br>搞不好也會有同樣的想法</h2>
+  <div class="panel" style="margin-top:22px;font-size:18px"><span class="tag b">議題</span>&nbsp; 公司宣布：取消彈性上下班，全員改回 9:00 固定打卡。</div>
+  <div class="personas" style="margin-top:16px" id="personas">
+    <button class="persona on" data-p="0"><b>新手爸媽</b><span>每天要送小孩上學</span></button>
+    <button class="persona" data-p="1"><b>部門主管</b><span>曾被找不到人拖垮專案</span></button>
+    <button class="persona" data-p="2"><b>遠距通勤者</b><span>單程一個半小時</span></button>
+    <button class="persona" data-p="3"><b>剛入職新人</b><span>很多事還要問前輩</span></button>
+  </div>
+  <div class="stack" style="margin-top:18px">
+    <div class="speech fade-in" id="pSay"></div>
+    <div class="lensrow" id="pLens"></div>
+  </div>
+</section>
+
+<!-- 13 how vs what -->
+<section class="slide" data-title="強調怎麼看到，而非看到什麼">
+  <div class="eyebrow"><b>PART 3</b> 溝通的轉向</div><div class="pgno"></div>
+  <h2>強調大家是<span class="hl-a">怎麼看到、為何看到</span>，<br>別強調究竟看到了什麼</h2>
+  <div class="row" style="margin-top:20px" id="pairTabs">
+    <button class="btn on" data-m="">兩者對照</button>
+    <button class="btn" data-m="dim-how">只看「爭看到什麼」</button>
+    <button class="btn" data-m="dim-what">只看「問怎麼看到」</button>
+  </div>
+  <div class="pairs" id="pairs" style="margin-top:20px">
+    <div class="pair"><div class="what"><small>爭「看到什麼」</small>「你這個數據根本是錯的。」</div><div class="how"><small>問「怎麼看到」</small>「你是從哪些資料看出這個趨勢的？」</div></div>
+    <div class="pair"><div class="what"><small>爭「看到什麼」</small>「那種養生文都是假的啦！」</div><div class="how"><small>問「怎麼看到」</small>「這篇文章裡，哪一點最讓你覺得可信？」</div></div>
+    <div class="pair"><div class="what"><small>爭「看到什麼」</small>「你就是想太多、太敏感。」</div><div class="how"><small>問「怎麼看到」</small>「是哪個瞬間讓你有這種感覺？以前也發生過嗎？」</div></div>
+  </div>
+  <p style="margin-top:18px;font-size:17px;color:var(--muted)">有爭議的議題之所以有爭議，是因為大家在<b style="color:var(--ink)">消除歧異的過程</b>中用了不同方式 —— 把對話焦點放在「過程」，對方才不需要捍衛「結論」。</p>
+</section>
+
+<!-- 14 章節 -->
+<section class="slide divider" data-title="PART 4 同化與調適">
+  <div class="ring"></div><div class="ring2"></div>
+  <div class="num">PART 04</div>
+  <h2>同化與調適</h2>
+  <p>感覺到「我可能錯了」，通常的解決方案是 ——「但我也可能沒錯嘛」。</p>
+</section>
+
+<!-- 15 同化 vs 調適 -->
+<section class="slide" data-title="同化 vs 調適 小測驗">
+  <div class="eyebrow"><b>PART 4</b> 期望落空之後 <span class="hint" style="letter-spacing:0;text-transform:none;font-family:var(--sans)">點選右側回應，看它屬於哪一種</span></div><div class="pgno"></div>
+  <h2>大腦想要的，只是消除「失調」的感覺</h2>
+  <div class="body" style="grid-template-columns:4fr 8fr;margin-top:20px">
+    <div class="stack">
+      <div class="panel"><span class="tag b">同化 Assimilation</span><p style="font-size:17px;margin-top:10px">把新資訊<b>塞進</b>原本對世界的理解。不費力，大腦預設偏好。</p></div>
+      <div class="panel"><span class="tag ok">調適 Accommodation</span><p style="font-size:17px;margin-top:10px">小心<b>更新</b>自己的模型。需要特別的動機才會發生。</p></div>
+      <p style="font-size:15px;color:var(--muted)">期望落空、預測失敗會讓人進入學習狀態 —— 但「感覺可能有衝突」不等於「選擇調適」。</p>
+    </div>
+    <div class="quiz" id="quiz">
+      
+    </div>
+  </div>
+</section>
+
+<!-- 16 風險報酬 -->
+<section class="slide" data-title="改變心意的風險與報酬">
+  <div class="eyebrow"><b>PART 4</b> 大腦的成本效益</div><div class="pgno"></div>
+  <h2>更新想法前，大腦會先算<br><span class="hl-b">風險</span>與<span class="hl-a">報酬</span></h2>
+  <div class="body cols-2">
+    <div class="stack">
+      <div class="row" id="presets">
+        <button class="btn preset on" data-r="7" data-w="5">會議上承認時程估錯</button>
+        <button class="btn preset" data-r="9" data-w="2">看一篇網文就停掉醫師開的藥</button>
+        <button class="btn preset" data-r="2" data-w="7">試用同事推薦的新工具</button>
+      </div>
+      <div class="slider"><label for="risk">改變的風險</label><input type="range" id="risk" min="0" max="10" value="7"><output id="riskV">7</output></div>
+      <div class="slider"><label for="reward">改變的報酬</label><input type="range" id="reward" min="0" max="10" value="5"><output id="rewardV">5</output></div>
+      <div class="verdict fade-in" id="verdict"></div>
+    </div>
+    <div class="stack" style="justify-content:center">
+      <div class="scale">
+        <div class="pivot"></div>
+        <div class="beam" id="beam">
+          <div class="pan l"><div class="dish">風險</div></div>
+          <div class="pan r"><div class="dish">報酬</div></div>
+        </div>
+      </div>
+      <p style="font-size:17px;color:var(--muted);text-align:center">不論是生物或機器的學習，都會考量風險與報酬。<br><b style="color:var(--ink)">而且大多數時候，傾向同化確實是個好選擇。</b></p>
+    </div>
+  </div>
+</section>
+
+<!-- 17 漂白劑 -->
+<section class="slide" data-title="漂白劑與室友">
+  <div class="eyebrow"><b>PART 4</b> 想法一定會變，只是未必變在你以為的地方</div><div class="pgno"></div>
+  <h2>室友說：「漂白劑可以喝，<br>對健康大有好處。」</h2>
+  <p class="lead" style="margin-top:18px">聽完之後，你會改變對什麼的想法？</p>
+  <div class="choices" style="margin-top:20px" id="bleach">
+    <button class="choice" data-c="0">對「漂白劑」的看法</button>
+    <button class="choice" data-c="1">對「室友」的看法</button>
+  </div>
+  <div class="body cols-2" id="bleachOut" hidden style="margin-top:22px">
+    <div class="panel fade-in"><span class="tag">書中的答案</span><p style="font-size:18px;margin-top:10px">你改變的多半不是對漂白劑的看法，而是<b>對室友的看法</b>。但總之，一定改變了對某項事物或某個人的想法。</p></div>
+    <div class="panel fade-in"><span class="tag b">職場版</span><p style="font-size:18px;margin-top:10px">同事信誓旦旦：「老闆說下週全員放假！」你不會開始訂機票，而是下修<b>這位同事消息的可信度</b>。反過來說 —— 當你試圖說服別人，<b>你的可信度也正在被評估</b>。</p></div>
+  </div>
+</section>
+
+<!-- 18 章節 -->
+<section class="slide divider" data-title="PART 5 街頭知識論">
+  <div class="ring"></div><div class="ring2"></div>
+  <div class="num">PART 05</div>
+  <h2>街頭知識論</h2>
+  <p>不是贏得爭論，而是陪對方檢視自己的推理方式。九個步驟。</p>
+</section>
+
+<!-- 19 九步驟 -->
+<section class="slide" data-title="街頭知識論九步驟（對話演練）">
+  <div class="eyebrow"><b>PART 5</b> 對話演練</div><div class="pgno"></div>
+  <div class="row" style="justify-content:space-between;margin-top:6px">
+    <h2 style="font-size:36px;margin:0">九個步驟，走一次真實對話</h2>
+    <div class="row" id="seTabs">
+      <button class="btn on" data-x="0">職場：遠端工作</button>
+      <button class="btn" data-x="1">家人：養生文</button>
+    </div>
+  </div>
+  <div class="se" style="margin-top:20px">
+    <div class="steps" id="seSteps"></div>
+    <div class="dialog" id="seDialog"></div>
+  </div>
+</section>
+
+<!-- 20 重點 -->
+<section class="slide" data-title="五個帶走的重點">
+  <div class="eyebrow"><b>總結</b> 帶走這五件事</div><div class="pgno"></div>
+  <h2>下次想說服人之前</h2>
+  <div class="takeaways" style="margin-top:28px">
+    <div class="tk"><span class="k">框架競爭</span><h3>多半不是在吵事實</h3><p>事實有共識，詮釋才有分歧。先確認你們在爭哪一層。</p></div>
+    <div class="tk"><span class="k">先驗知識</span><h3>大腦會挑選經驗</h3><p>身分、歸屬、社會成本、信任，悄悄決定了對方用哪些經驗判斷。</p></div>
+    <div class="tk"><span class="k">反證</span><h3>證據可能適得其反</h3><p>直接丟反證，對方會懷疑「照明」，而不是懷疑自己。</p></div>
+    <div class="tk"><span class="k">同化 / 調適</span><h3>改變是有成本的</h3><p>對方若覺得改變的風險大於報酬，堅持原本想法其實很合理。</p></div>
+    <div class="tk"><span class="k">街頭知識論</span><h3>問「怎麼知道的」</h3><p>聆聽、複述、問信心與方法，然後好好收尾，不求當場翻轉。</p></div>
+  </div>
+</section>
+
+<!-- 21 討論 -->
+<section class="slide" data-title="討論時間">
+  <div class="eyebrow"><b>討論</b> 抽一題，大家輪流聊</div><div class="pgno"></div>
+  <div class="body" style="grid-template-columns:8fr 4fr;margin-top:20px">
+    <div class="stack">
+      <div class="qcard fade-in" id="qCard"></div>
+      <div class="row">
+        <button class="btn primary" id="qNext">抽下一題</button>
+        <span style="font-size:14px;color:var(--muted)" id="qCount"></span>
+      </div>
+    </div>
+    <div class="stack panel" style="justify-content:space-between">
+      <div><span class="tag b">每人發言計時</span></div>
+      <div class="timer" id="tTime">03:00</div>
+      <div class="tbar"><i id="tBar"></i></div>
+      <div class="row">
+        <button class="btn preset on" data-sec="180">3 分</button>
+        <button class="btn preset" data-sec="300">5 分</button>
+        <button class="btn primary" id="tGo">開始</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 22 結尾 -->
+<section class="slide cover" data-title="結尾">
+  <div class="left">
+    <div class="eyebrow"><b>謝謝參與</b></div>
+    <div>
+      <h1 style="font-size:60px">「我們也必須承認，<br>如果我們也走過別人的經歷，<br>搞不好也會出現與他們同樣的想法。」</h1>
+      <p class="lead" style="margin-top:24px">——《如何讓人改變想法》</p>
+    </div>
+    <p style="font-size:15px;color:var(--muted)">書籍連結：readmoo.com/book/210273407000101　·　回到開場：你現在會怎麼回答「最近一次改變想法的原因」？</p>
+  </div>
+  <div class="right">
+    <div class="lens l1" style="left:120px;top:190px"></div><div class="lens l2" style="left:150px;top:210px"></div>
+    <div class="cap">當我們理解彼此「怎麼看見」，兩個鏡片就更靠近一點。</div>
+  </div>
+</section>
+
+</div></div>
+
+<div class="toc" id="toc" hidden></div>
+<div class="bar">
+  <div class="grp"><span class="stitle" id="stitle"></span></div>
+  <div class="grp">
+    <button class="ib" id="prev" aria-label="上一頁">←</button>
+    <span class="counter" id="counter">1 / 22</span>
+    <button class="ib" id="next" aria-label="下一頁">→</button>
+  </div>
+  <div class="grp">
+    <span class="keys">F 全螢幕 · T 目錄</span>
+    <button class="ib" id="tocBtn" aria-label="目錄">目錄</button>
+    <button class="ib" id="themeBtn" aria-label="切換深淺色">◐</button>
+    <button class="ib" id="fsBtn" aria-label="全螢幕">⛶</button>
+  </div>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const stage=$('#stage'), slides=$$('.slide');
+let cur=0;
+
+/* ---------- 版面縮放 ---------- */
+function fit(){
+  const vw=innerWidth-32, vh=innerHeight-56-24;
+  const s=Math.min(vw/1280, vh/720);
+  stage.style.transform=`translate(-50%,-50%) scale(${s})`;
+}
+addEventListener('resize',fit); fit();
+
+/* ---------- 導覽 ---------- */
+slides.forEach((s,i)=>{const p=s.querySelector('.pgno'); if(p) p.textContent=String(i+1).padStart(2,'0');});
+function go(n,showAll){
+  n=Math.max(0,Math.min(slides.length-1,n));
+  slides[cur].classList.remove('active');
+  cur=n; const s=slides[cur]; s.classList.add('active');
+  $$('.step',s).forEach(e=>e.classList.toggle('on',!!showAll));
+  $('#counter').textContent=`${cur+1} / ${slides.length}`;
+  $('#stitle').textContent=s.dataset.title||'';
+  $('#progress').style.width=((cur+1)/slides.length*100)+'%';
+  $$('#toc button').forEach((b,i)=>b.classList.toggle('cur',i===cur));
+  try{history.replaceState(null,'','#'+(cur+1));}catch(e){}
+}
+function next(){
+  const hidden=$$('.step:not(.on)',slides[cur]);
+  if(hidden.length){hidden[0].classList.add('on');return;}
+  if(cur<slides.length-1) go(cur+1);
+}
+function prev(){ if(cur>0) go(cur-1,true); }
+$('#next').onclick=next; $('#prev').onclick=prev;
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT') return;
+  if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();next();}
+  else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();prev();}
+  else if(e.key==='Home') go(0); else if(e.key==='End') go(slides.length-1);
+  else if(e.key==='f'||e.key==='F') toggleFs();
+  else if(e.key==='t'||e.key==='T') toggleToc();
+  else if(e.key==='Escape') $('#toc').hidden=true;
+});
+let tx=null;
+stage.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+stage.addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>60)(dx<0?next:prev)();tx=null;});
+
+const toc=$('#toc');
+slides.forEach((s,i)=>{const b=document.createElement('button');b.innerHTML=`<span>${String(i+1).padStart(2,'0')}</span>${s.dataset.title}`;b.onclick=()=>{go(i,true);toc.hidden=true;};toc.appendChild(b);});
+function toggleToc(){toc.hidden=!toc.hidden;}
+$('#tocBtn').onclick=toggleToc;
+function toggleFs(){ if(!document.fullscreenElement){document.documentElement.requestFullscreen?.().catch(()=>{});} else document.exitFullscreen?.(); }
+$('#fsBtn').onclick=toggleFs;
+$('#themeBtn').onclick=()=>{
+  const r=document.documentElement, dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  r.dataset.theme=dark?'light':'dark';
+};
+function group(sel,cb){ $$(sel).forEach(b=>b.addEventListener('click',()=>{ $$(sel).forEach(x=>x.classList.remove('on')); b.classList.add('on'); cb(b); })); }
+
+/* ---------- 2 暖身 ---------- */
+const warmMsg={
+ '有人給我看了數據':'有趣 —— 書裡會說，數據有用的前提，是它沒有威脅到你的身分認同與歸屬感。',
+ '我信任的人這樣說':'這正是「信任與名聲」在運作：誰說的，常常比說了什麼更重要。',
+ '我親身經歷了一次':'期望落空會讓大腦進入學習狀態 —— 這是 PART 4 的主題。',
+ '被吵贏的':'真的嗎？還是其實後來自己慢慢想通的？今天會談到為什麼「吵」很少奏效。'
+};
+group('#warm .btn',b=>{const o=$('#warmOut');o.classList.remove('fade-in');void o.offsetWidth;o.classList.add('fade-in');o.textContent=warmMsg[b.dataset.v];});
+
+/* ---------- 4 先驗知識 chips ---------- */
+const chipData=[
+ ['身分認同','「我是資深工程師」。新人提議換掉用了五年的系統架構，你第一個念頭是「他不懂我們系統的歷史」，而不是先看提案內容。'],
+ ['歸屬感','部門群組裡大家都在罵新的績效制度。你私下覺得其實還不錯，但在群組裡還是跟著回了「真的很誇張」。'],
+ ['社會成本','會議上大家都反對某個提案。你覺得有道理，卻擔心一開口就被貼上「跟老闆同一國」的標籤，於是保持沉默。'],
+ ['信任與名聲','同樣一句「這個流程可以簡化」，由你敬重的學長說出來，你覺得很有洞見；由你看不順眼的同事說，你只看到漏洞。']
+];
+function showChip(k){const e=$('#chipEx');e.classList.remove('fade-in');void e.offsetWidth;e.classList.add('fade-in');e.innerHTML=`<span class="tag">${chipData[k][0]}・生活例子</span><p>${chipData[k][1]}</p>`;}
+group('#chips .chip',b=>showChip(+b.dataset.k)); showChip(0);
+
+/* ---------- 5 框架競爭 ---------- */
+const frames=[
+ {fact:'小陳這週有三場會議都遲到 10 分鐘。',
+  whoA:'主管眼中',sayA:'「他不重視團隊，態度有問題。」',priorA:'背後的先驗：過去帶過一位常遲到、最後擺爛離職的部屬。',
+  whoB:'小陳的隔壁同事眼中',sayB:'「他同時被三個專案拉著跑，前一場會總是延後結束。」',priorB:'背後的先驗：自己也常被塞會議，知道行事曆有多滿。'},
+ {fact:'對方已讀訊息，三個小時沒有回。',
+  whoA:'傳訊息的人眼中',sayA:'「他覺得我不重要。」',priorA:'背後的先驗：上一段關係裡，冷淡就是從不回訊息開始的。',
+  whoB:'已讀的人眼中',sayB:'「我在開會，想好好回，所以晚點再說。」',priorB:'背後的先驗：從小家裡習慣「重要的事當面講」。'},
+ {fact:'孩子大學畢業，決定不考公職，去一家新創公司。',
+  whoA:'父母眼中',sayA:'「太冒險了，新創隨時會倒。」',priorA:'背後的先驗：經歷過景氣崩盤，看過親友失業。',
+  whoB:'孩子眼中',sayB:'「這才是能快速成長的選擇。」',priorB:'背後的先驗：身邊同學在新創一年學到的，比別人三年還多。'}
+];
+function showFrame(i){const f=frames[i];$('#factTxt').textContent=f.fact;['A','B'].forEach(k=>{$('#who'+k).textContent=f['who'+k];$('#say'+k).textContent=f['say'+k];$('#prior'+k).textContent=f['prior'+k];$('#flip'+k).classList.remove('flipped');});}
+group('#frameTabs .btn',b=>showFrame(+b.dataset.s)); showFrame(0);
+['#flipA','#flipB'].forEach(s=>$(s).onclick=()=>$(s).classList.toggle('flipped'));
+
+/* ---------- 7 SURFPAD ---------- */
+const terms=[
+ ['大量的不確定性','資訊不完整、可以有多種解讀的情境。關鍵在於：我們<b>通常不會發現</b>自己其實還不確定。','主管在群組只回了一句「嗯」。是同意？不滿？還是在忙？—— 這就是一個高度不確定的訊號。'],
+ ['各自不同、自行補完的先驗','大腦會用過去經驗把空白「補完」。人的問題、目標、動機、憂慮，最重要的是<b>經歷</b>不同，補出來的畫面就不同。','被主管罵過的人，補完成「他在不爽」；跟主管很熟的人，補完成「他在開車，回個嗯而已」。'],
+ ['爭論與意見分歧','沒有意識到分歧來自「補完的過程」，就會覺得對方在否認<b>現實</b>，於是雙方都覺得答案「再明顯不過」。','兩位同事為「主管到底有沒有不高興」吵起來，各自都覺得對方很誇張 —— 其實兩人手上的資訊一模一樣。']
+];
+function showTerm(i){const e=$('#termEx');e.classList.remove('fade-in');void e.offsetWidth;e.classList.add('fade-in');e.innerHTML=`<span class="tag">${terms[i][0]}</span><p>${terms[i][1]}</p>`;$('#termLife').innerHTML=terms[i][2];}
+group('#formula .term',b=>showTerm(+b.dataset.t)); showTerm(0);
+
+/* ---------- 9 錯覺 ---------- */
+const illu=$('#illusion'), iOut=$('#illuOut');
+$('#illuBtn').onclick=()=>{illu.classList.add('reveal');iOut.innerHTML='兩個方塊其實是<b>完全相同的灰色</b>。大腦依照背景自動「校正」了亮度。';};
+$('#illuBg').onclick=()=>{illu.classList.add('nobg');iOut.innerHTML='拿掉背景（情境）之後，差異就消失了 —— 我們看到的，一直包含著大腦的<b>假設</b>。';};
+$('#illuReset').onclick=()=>{illu.classList.remove('reveal','nobg');iOut.textContent='';};
+
+/* ---------- 11 反證模擬 ---------- */
+const evs=[
+ ['📄 近半年交期延誤報表：A 延誤 9 次','「系統的交期是業務亂填的，數字不準。」',72],
+ ['📞 客服紀錄：A 的零件客訴最多','「那幾個客戶本來就很挑，不代表什麼。」',81],
+ ['💰 B 廠商報價便宜 12%，品質認證齊全','「便宜沒好貨，你是不是被 B 的業務說動了？」',90],
+ ['🙂 （主觀感受）','「我可是很客觀地看過所有資料了。」',95]
+];
+let evI=0; const evList=$('#evList'), bNum=$('#belief'), bBar=$('#beliefBar');
+function setBelief(v){bNum.textContent=v;bBar.style.width=v+'%';}
+$('#evBtn').onclick=()=>{
+  if(evI>=evs.length) return;
+  const [a,b,v]=evs[evI++]; const d=document.createElement('div');d.className='ev fade-in';
+  d.innerHTML=`<div class="in">${a}</div><div class="out">${b}</div>`;evList.appendChild(d);setBelief(v);
+  if(evI>=evs.length){$('#evBtn').textContent='信念更堅定了';}
+};
+$('#evReset').onclick=()=>{evI=0;$$('.ev.fade-in',evList).forEach(x=>x.remove());setBelief(60);$('#evBtn').textContent='提出下一份證據';};
+setBelief(60);
+
+/* ---------- 12 personas ---------- */
+const ps=[
+ ['「這根本是在逼有小孩的人離職。」',['問題','九點前送不到學校'],['目標','工作與家庭都顧好'],['憂慮','天天遲到被記點'],['經歷','彈性制度讓自己撐過育嬰期']],
+ ['「終於！大家同一時間在，協作才順。」',['問題','臨時要開會卻找不到人'],['目標','專案如期交付'],['憂慮','團隊默契鬆散'],['經歷','上個專案因為等人延誤兩週']],
+ ['「每天多塞一小時車，效率只會更差。」',['問題','尖峰時段通勤時間暴增'],['目標','把時間留給工作與休息'],['憂慮','長期疲勞'],['經歷','錯峰通勤時產出最好']],
+ ['「其實不錯，固定時間比較好找前輩請教。」',['問題','常常不知道誰在'],['目標','快點上手'],['憂慮','問問題打擾別人'],['經歷','上一份工作沒人帶、摸索很久']]
+];
+function showP(i){const e=$('#pSay');e.classList.remove('fade-in');void e.offsetWidth;e.classList.add('fade-in');e.textContent=ps[i][0];$('#pLens').innerHTML=ps[i].slice(1).map(([k,v])=>`<div><b>${k}</b>${v}</div>`).join('');}
+group('#personas .persona',b=>showP(+b.dataset.p)); showP(0);
+
+/* ---------- 13 pairs ---------- */
+group('#pairTabs .btn',b=>{$('#pairs').className='pairs '+b.dataset.m;});
+
+/* ---------- 15 quiz ---------- */
+const quiz=[
+ ['你負責的活動，報名人數只有預期的一半。',[['「最近大家都很忙，下次就會好了。」',0],['「回頭檢查宣傳管道和時間點，看哪裡跟預期不同。」',1]]],
+ ['好友對你說：「你最近常常臨時取消約定。」',[['「我確實常臨時取消，可能要調整排程了。」',1],['「是他比較敏感吧，我又不是故意的。」',0]]],
+ ['新人做簡報的方式跟你教的不同，但客戶反應更好。',[['「只是剛好客戶喜歡新鮮感。」',0],['「也許我那套做法有該更新的地方。」',1]]]
+];
+const qz=$('#quiz');
+quiz.forEach(([sit,opts])=>{
+  const q=document.createElement('div');q.className='q';
+  q.innerHTML=`<div class="sit">${sit}</div><div class="opts"></div>`;
+  opts.forEach(([t,acc])=>{const o=document.createElement('button');o.className='opt '+(acc?'acc':'asm');
+    o.innerHTML=`${t}<div class="res">${acc?'<span class="tag ok">調適・更新模型</span>':'<span class="tag b">同化・塞回舊理解</span>'}</div>`;
+    o.onclick=()=>$$('.opt',q).forEach(x=>x.classList.add('shown'));
+    q.querySelector('.opts').appendChild(o);});
+  qz.appendChild(q);
+});
+
+/* ---------- 16 風險報酬 ---------- */
+const risk=$('#risk'), reward=$('#reward');
+const presetNote={'7-5':'當眾承認估錯，要付出面子與信任的代價。','9-2':'只憑一篇網文就改變醫療決定，風險極高 —— 此時「不輕易改變」是保護自己。','2-7':'試用只要十分鐘，就算不好用也沒什麼損失。'};
+function upd(){
+  const r=+risk.value,w=+reward.value; $('#riskV').textContent=r; $('#rewardV').textContent=w;
+  $('#beam').style.transform=`rotate(${(w-r)*-2.2}deg)`;
+  let t; if(r-w>=2) t='<span class="tag b">傾向同化</span>&nbsp; 風險大於報酬，大腦選擇維持原本的想法。';
+  else if(w-r>=2) t='<span class="tag ok">傾向調適</span>&nbsp; 報酬明顯較大，比較可能真的更新想法。';
+  else t='<span class="tag">猶豫區</span>&nbsp; 風險與報酬接近，常常會拖著不決定。';
+  const note=presetNote[r+'-'+w]; const v=$('#verdict');
+  v.innerHTML=t+(note?`<div style="font-size:16px;color:var(--muted);margin-top:8px">${note}</div>`:'');
+}
+risk.oninput=()=>{$$('#presets .btn').forEach(x=>x.classList.remove('on'));upd();};
+reward.oninput=risk.oninput;
+group('#presets .btn',b=>{risk.value=b.dataset.r;reward.value=b.dataset.w;upd();});
+upd();
+
+/* ---------- 17 漂白劑 ---------- */
+group('#bleach .choice',b=>{$$('#bleach .choice').forEach(x=>x.classList.remove('pick'));b.classList.add('pick');$('#bleachOut').hidden=false;});
+
+/* ---------- 19 街頭知識論 ---------- */
+const seSteps=['建立融洽的關係','請對方提出主張','用自己的話複述','澄清對方的定義','請對方給信心數字','詢問信心的理由','詢問判斷的方法','聆聽、摘要、重複','收尾，祝對方順利'];
+const seWhy=[
+ '向對方保證你<b>不是要羞辱他們</b>，並請他們同意讓你探索他們的推理方式。',
+ '讓對方<b>自己說出</b>一項主張，而不是你替他歸納。',
+ '用你的話複述，詢問「我的摘要正確嗎？」<b>重複到對方滿意</b>為止。',
+ '使用<b>對方的定義</b>，而不是你自己的定義。',
+ '請對方為自己的主張給一個<b>信心數字</b>（0–100）。',
+ '詢問是<b>什麼理由</b>讓他們目前有這樣的信心。',
+ '詢問對方用<b>什麼方法</b>判斷理由夠不夠充分，接下來的對話聚焦在那項方法上。',
+ '持續<b>聆聽、摘要、重複</b>，讓對方感覺被理解。',
+ '好好收尾，<b>祝對方順利</b>。不要求對方當場改變。'
+];
+const seScript=[
+ {name:'同事阿哲',claim:'遠端工作的人比較混',conf:85,lines:[
+  [['me','我不是要跟你爭誰對，只是很好奇你怎麼看遠端工作，可以聊聊嗎？'],['them','好啊，反正午休。']],
+  [['me','你對遠端工作的看法是？'],['them','老實說，遠端工作的人一定比較混。']],
+  [['me','所以你是說，在家工作的人產出比進辦公室的少，對嗎？'],['them','也不是產出……是找人的時候很難找。'],['me','喔，所以你在意的是「需要時找不找得到人」？'],['them','對，就是這個。']],
+  [['me','你說的「混」，具體是指什麼樣的狀況？'],['them','訊息丟出去，半小時以上都沒回。'],['me','好，那我們就用「半小時以上沒回」來討論。']],
+  [['me','如果 0 到 100 分，你對「遠端的人比較常半小時以上沒回」有多確定？'],['them','嗯……大概 85 吧。']],
+  [['me','是什麼讓你有 85 分這麼高的信心？'],['them','上次專案急著找小美，等了快兩個小時。還有幾次也是。']],
+  [['me','你是怎麼判斷這幾次經驗，能代表大多數遠端同事的？'],['them','呃……好像就是記得特別氣的那幾次。'],['me','那回很快的時候，你會記下來嗎？'],['them','……應該不會。']],
+  [['me','我整理一下：你的信心主要來自幾次等很久的經驗，而你也發現回很快的時候不太會記得，是這樣嗎？'],['them','對，這樣講我好像要再觀察看看。']],
+  [['me','謝謝你願意聊，我更懂你卡在哪了。有新想法再交流！'],['them','好，下次再聊。']]
+ ]},
+ {name:'媽媽',claim:'每天喝檸檬水可以排毒',conf:90,lines:[
+  [['me','媽，我不是要說妳錯，只是想知道妳怎麼看群組裡那篇文章，可以跟我聊聊嗎？'],['them','好啊，妳想問什麼？']],
+  [['me','妳覺得那篇文章在說什麼？'],['them','每天早上喝檸檬水，可以把身體的毒排掉。']],
+  [['me','所以妳的意思是，喝檸檬水會讓身體把某些東西排出去，對嗎？'],['them','對，而且喝了精神比較好。'],['me','喔，所以有兩件事：排毒，還有精神變好？'],['them','對對對。']],
+  [['me','妳說的「毒」，是指什麼呢？'],['them','就是……吃進去不好的東西，像油啊、宿便。'],['me','好，那我們就用「吃進去不好的東西」來講。']],
+  [['me','如果 0 到 100 分，妳對「檸檬水能排掉吃進去不好的東西」有多確定？'],['them','90 吧，大家都這樣說。']],
+  [['me','是什麼讓妳有 90 分？'],['them','群組很多人轉，王阿姨說她喝了兩個月，氣色變好了。']],
+  [['me','妳平常是怎麼分辨一篇健康文章可不可信的？'],['them','嗯……看轉的人多不多吧。'],['me','那如果很多人轉，但內容是錯的，有辦法看出來嗎？'],['them','這倒是沒想過。']],
+  [['me','我整理一下：妳的信心主要來自很多人轉傳和王阿姨的經驗，而妳平常是用「轉的人多不多」來判斷，對嗎？'],['them','對。這樣聽起來好像可以再查查。']],
+  [['me','謝謝媽願意跟我聊！妳喝了覺得精神好也很棒，有看到什麼新文章我們再一起看。'],['them','好啦，妳也要多喝水。']]
+ ]}
+];
+let seX=0, seI=0, seConf={0:85,1:90};
+const stepsEl=$('#seSteps'), dlg=$('#seDialog');
+seSteps.forEach((t,i)=>{const b=document.createElement('button');b.className='sbtn';b.innerHTML=`<i>${i+1}</i>${t}`;b.onclick=()=>{seI=i;renderSE();};stepsEl.appendChild(b);});
+function renderSE(){
+  const sc=seScript[seX];
+  $$('.sbtn',stepsEl).forEach((b,i)=>{b.classList.toggle('on',i===seI);b.classList.toggle('done',i<seI);});
+  let h=`<div class="row" style="justify-content:space-between"><div class="title">${seI+1}. ${seSteps[seI]}</div><span class="tag b">主張：${sc.claim}</span></div>`;
+  h+=sc.lines[seI].map(([w,t])=>`<div class="bubble ${w} fade-in"><span class="who">${w==='me'?'我':sc.name}</span>${t}</div>`).join('');
+  if(seI===4){h+=`<div class="conf"><label for="confR" style="font-size:15px;white-space:nowrap">${sc.name}的信心</label><input type="range" id="confR" min="0" max="100" value="${seConf[seX]}"><output id="confV">${seConf[seX]}</output></div>`;}
+  h+=`<div class="why"><b>這一步的要點：</b>${seWhy[seI]}</div>`;
+  h+=`<div class="row" style="justify-content:flex-end"><button class="btn" id="seP" ${seI===0?'disabled':''}>上一步</button><button class="btn primary" id="seN">${seI===8?'從頭開始':'下一步'}</button></div>`;
+  dlg.innerHTML=h;
+  $('#seP').onclick=()=>{if(seI>0){seI--;renderSE();}};
+  $('#seN').onclick=()=>{seI=seI===8?0:seI+1;renderSE();};
+  const cr=$('#confR'); if(cr) cr.oninput=()=>{seConf[seX]=+cr.value;$('#confV').textContent=cr.value;};
+}
+group('#seTabs .btn',b=>{seX=+b.dataset.x;seI=0;renderSE();});
+renderSE();
+
+/* ---------- 21 討論 ---------- */
+const qs=[
+ '你最近一次真正改變想法，是什麼讓你改變的？跟開場的答案一樣嗎？',
+ '回想一次「兩邊都覺得對方很誇張」的爭執。你們的先驗知識有什麼不同？',
+ '在你的職場，公開說「我錯了」的社會成本高嗎？這怎麼影響團隊決策？',
+ '家人轉傳你認為錯誤的訊息時，你通常怎麼回應？效果如何？',
+ '街頭知識論九個步驟中，你覺得哪一步最難做到？為什麼？',
+ '什麼情況下，「同化」、不輕易改變想法，其實是好選擇？',
+ '有沒有一次，你改變的不是對某件事的看法，而是對「說的人」的看法？'
+];
+let qi=-1; const order=qs.map((_,i)=>i).sort(()=>Math.random()-.5);
+function nextQ(){qi=(qi+1)%qs.length;const c=$('#qCard');c.classList.remove('fade-in');void c.offsetWidth;c.classList.add('fade-in');c.textContent=qs[order[qi]];$('#qCount').textContent=`第 ${qi+1} / ${qs.length} 題`;}
+$('#qNext').onclick=nextQ; nextQ();
+let total=180, left=180, tId=null;
+function drawT(){const m=Math.floor(left/60),s=left%60;$('#tTime').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;$('#tBar').style.width=(left/total*100)+'%';$('#tTime').style.color=left<=30?'var(--no)':'var(--ink)';}
+function stopT(){clearInterval(tId);tId=null;$('#tGo').textContent='開始';}
+$$('.slide[data-title="討論時間"] [data-sec]').forEach(b=>b.addEventListener('click',()=>{$$('.slide[data-title="討論時間"] [data-sec]').forEach(x=>x.classList.remove('on'));b.classList.add('on');stopT();total=left=+b.dataset.sec;drawT();}));
+$('#tGo').onclick=()=>{
+  if(tId){stopT();return;}
+  if(left<=0){left=total;}
+  $('#tGo').textContent='暫停';
+  tId=setInterval(()=>{left--;drawT();if(left<=0){stopT();$('#tGo').textContent='重新計時';}},1000);
+};
+drawT();
+
+/* ---------- 啟動 ---------- */
+const h=parseInt(location.hash.slice(1),10);
+go(isNaN(h)?0:h-1,!isNaN(h)&&h>1);
+})();
+</script>
+</body>
+</html>
